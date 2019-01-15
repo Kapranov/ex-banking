@@ -24,10 +24,12 @@ defmodule ExBanking do
   | {:ok, new_balance :: number}
   | {:ok, from_user_balance :: number, to_user_balance :: number}
 
-  def start_link(opts), do: GenServer.start_link(@name, opts, name: @name)
+  def start_link(repo_server) do
+    GenServer.start_link(@name, repo_server, name: @name)
+  end
 
   @impl true
-  def init(args), do: {:ok, args}
+  def init(repo_server), do: {:ok, repo_server}
 
   @doc """
   Function creates new user in the system

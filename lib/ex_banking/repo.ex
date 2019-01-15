@@ -5,8 +5,10 @@ defmodule ExBanking.Repo do
 
   @name __MODULE__
 
-  def start_link(opts), do: GenServer.start_link(@name, opts, name: @name)
+  def start_link(initial_user) do
+    GenServer.start_link(@name, initial_user, name: @name)
+  end
 
   @impl true
-  def init(args), do: {:ok, args}
+  def init(initial_user), do: {:ok, initial_user}
 end
