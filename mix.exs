@@ -13,13 +13,20 @@ defmodule ExBanking.MixProject do
 
   def application do
     [
-      extra_applications: [:logger],
+      extra_applications: applications(Mix.env),
       mod: {ExBanking.Application, []}
     ]
   end
 
   defp deps do
     [
+      {:credo, "~> 1.0.0", only: [:dev, :test], runtime: false},
+      {:ex_unit_notifier, "~> 0.1", only: :test},
+      {:mix_test_watch, "~> 0.9.0"},
+      {:remix, "~> 0.0.1", only: :dev}
     ]
   end
+
+  defp applications(:dev), do: applications(:all) ++ [:remix]
+  defp applications(_all), do: [:logger]
 end
