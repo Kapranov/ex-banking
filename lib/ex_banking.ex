@@ -3,6 +3,10 @@ defmodule ExBanking do
   Documentation for ExBanking.
   """
 
+  use GenServer
+
+  @name __MODULE__
+
   @type banking_error ::
   {:error,
   :wrong_arguments
@@ -19,6 +23,11 @@ defmodule ExBanking do
   :ok
   | {:ok, new_balance :: number}
   | {:ok, from_user_balance :: number, to_user_balance :: number}
+
+  def start_link(opts), do: GenServer.start_link(@name, opts, name: @name)
+
+  @impl true
+  def init(args), do: {:ok, args}
 
   @doc """
   Function creates new user in the system
