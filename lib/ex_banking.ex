@@ -5,6 +5,8 @@ defmodule ExBanking do
 
   use GenServer
 
+  alias ExBanking.Repo
+
   @name __MODULE__
 
   @type banking_error ::
@@ -36,8 +38,11 @@ defmodule ExBanking do
   New user has zero balance of any currency
   """
   @spec create_user(user :: String.t) :: :ok | banking_error
-  def create_user(_user) do
+  def create_user(user) when is_bitstring(user) do
+    Repo.create_user(user)
   end
+
+  def create_user(_), do: {:error, :wrong_arguments}
 
   @doc """
   Increases user’s balance in given currency by amount value
