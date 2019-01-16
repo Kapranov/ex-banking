@@ -39,7 +39,11 @@ defmodule ExBanking do
   """
   @spec create_user(user :: String.t) :: :ok | banking_error
   def create_user(user) when is_bitstring(user) do
-    Repo.create_user(user)
+    if String.trim(user) != "" do
+      Repo.create_user(user)
+    else
+      {:error, :wrong_arguments}
+    end
   end
 
   def create_user(_), do: {:error, :wrong_arguments}
