@@ -21,9 +21,9 @@ defmodule ExBanking.MixProject do
   defp deps do
     [
       {:credo, "~> 1.0.0", only: [:dev, :test], runtime: false},
-      {:ex_unit_notifier, "~> 0.1", only: :test},
+      {:ex_unit_notifier, "~> 0.1.4", only: :test},
       {:mix_test_watch, "~> 0.9.0"},
-      {:remix, "~> 0.0.1", only: :dev}
+      {:remix, "~> 0.0.2", only: :dev}
     ]
   end
 
