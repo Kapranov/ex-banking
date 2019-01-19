@@ -3,12 +3,12 @@ defmodule ExBanking.Application do
 
   use Application
 
-  alias ExBanking.Repo
-
   def start(_type, _args) do
+    import Supervisor.Spec, warn: true
+
     children = [
-      {Repo, 0},
-      {ExBanking, Repo}
+      {ExBanking.Registry, []},
+      supervisor(ExBanking.Repo, [])
     ]
 
     opts = [strategy: :one_for_one, name: ExBanking.Supervisor]
