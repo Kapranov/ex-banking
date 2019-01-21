@@ -7,7 +7,6 @@ defmodule ExBanking.Application do
     import Supervisor.Spec, warn: true
 
     children = [
-      {ExBanking.Registry, []},
       supervisor(ExBanking.Repo, [])
     ]
 

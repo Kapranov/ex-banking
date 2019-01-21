@@ -14,6 +14,8 @@ defmodule ExBanking.Repo do
   end
 
   def init(_) do
+    ExBanking.Registry.start_link
+
     children = [
       worker(ExBanking.Server, [])
     ]
