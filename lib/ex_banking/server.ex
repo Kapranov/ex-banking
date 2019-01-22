@@ -4,6 +4,7 @@ defmodule ExBanking.Server do
   use GenServer
 
   @name __MODULE__
+  @user_registry :user_process_registry
 
   def start_link(name) do
     GenServer.start_link(@name, [], name: via_tuple(name))
@@ -28,7 +29,8 @@ defmodule ExBanking.Server do
     {:noreply, [account | state]}
   end
 
-  defp via_tuple(name) do
-    {:via, ExBanking.Registry, {:init_user, name}}
-  end
+  # without custom ExBanking.Registry
+  # defp via_tuple(name), do: {:via, ExBanking.Registry, {:init_user, name}}
+
+  defp via_tuple(name), do: {:via, Registry, {@user_registry, name}}
 end

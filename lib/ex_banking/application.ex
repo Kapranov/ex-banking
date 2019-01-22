@@ -7,7 +7,8 @@ defmodule ExBanking.Application do
     import Supervisor.Spec, warn: true
 
     children = [
-      supervisor(ExBanking.Repo, [])
+      supervisor(ExBanking.Repo, []),
+      {Registry, keys: :unique, name: :user_process_registry}
     ]
 
     opts = [strategy: :one_for_one, name: ExBanking.Supervisor]
