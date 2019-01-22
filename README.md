@@ -75,6 +75,89 @@ iex> ExBanking.Server.deposit("John", "Aloha ‘auinalā")
 iex> ExBanking.Server.get_balance("John")
 ```
 
+## There are rules if you will use en extand the package `gproc`:
+
+```elixir
+defmodule ExBanking.Server do
+  @moduledoc false
+
+  use GenServer
+
+  @name __MODULE__
+  @user_registry :user_process_registry
+
+  # ...
+
+  defp via_tuple(name) do
+    {:via, :gproc, {:n, :l, {:init_user, name}}}
+  end
+
+  # ...
+end
+```
+
+```elixir
+defmodule ExBanking.MixProject do
+  use Mix.Project
+
+  # ...
+
+  def application do
+    [
+      extra_applications: applications(Mix.env),
+      mod: {ExBanking.Application, []}
+    ]
+  end
+
+  defp deps do
+    [
+      {:credo, "~> 1.0.0", only: [:dev, :test], runtime: false},
+      {:ex_unit_notifier, "~> 0.1.4", only: :test},
+      {:gproc, "~> 0.8.0"},
+      {:mix_test_watch, "~> 0.9.0"},
+      {:remix, "~> 0.0.2", only: :dev}
+    ]
+  end
+
+  defp applications(:dev), do: applications(:all) ++ [:remix]
+  defp applications(_all), do: [:logger, :gproc]
+end
+```
+
+```bash
+iex> ExBanking.Repo.create_user("Oleg")
+iex> ExBanking.Repo.create_user("Josh")
+iex> ExBanking.Repo.create_user("John")
+
+iex> ExBanking.Server.deposit("Oleg", "Aloha")
+iex> ExBanking.Server.deposit("Josh", "Mahalo")
+iex> ExBanking.Server.deposit("John", "Lū‘au")
+
+iex> ExBanking.Server.get_balance("Oleg")
+iex> ExBanking.Server.get_balance("Josh")
+iex> ExBanking.Server.get_balance("John")
+
+iex> Process.whereis(:user_process_registry)
+
+iex> :gproc.where({:n, :l, {:user_process_registry, "Oleg"}}) |> Process.exit(:kill)
+
+iex> ExBanking.Server.get_balance("Oleg")
+iex> ExBanking.Server.deposit("Oleg", "Aloha kakahiaka")
+iex> ExBanking.Server.get_balance("Oleg")
+
+iex> :gproc.where({:n, :l, {:user_process_registry, "Josh"}}) |> Process.exit(:kill)
+
+iex> ExBanking.Server.get_balance("Josh")
+iex> ExBanking.Server.deposit("Josh", "Aloha awakea")
+iex> ExBanking.Server.get_balance("Josh")
+
+iex> :gproc.where({:n, :l, {:user_process_registry, "John"}}) |> Process.exit(:kill)
+
+iex> ExBanking.Server.get_balance("John")
+iex> ExBanking.Server.deposit("John", "Aloha ‘auinalā")
+iex> ExBanking.Server.get_balance("John")
+```
+
 ## There are rules if you will use a module `Kernel.Registry`:
 
 The file `lib/ex_banking/server.ex`:

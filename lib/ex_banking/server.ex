@@ -32,5 +32,9 @@ defmodule ExBanking.Server do
   # without custom ExBanking.Registry
   # defp via_tuple(name), do: {:via, ExBanking.Registry, {:init_user, name}}
 
-  defp via_tuple(name), do: {:via, Registry, {@user_registry, name}}
+  # without extand package :gproc
+  defp via_tuple(name), do: {:via, :gproc, {:n, :l, {@user_registry, name}}}
+
+  # without Kernel.Registry
+  # defp via_tuple(name), do: {:via, Registry, {@user_registry, name}}
 end
