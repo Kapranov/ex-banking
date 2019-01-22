@@ -59,17 +59,22 @@ iex> ExBanking.Server.get_balance("Oleg")
 iex> ExBanking.Server.get_balance("Josh")
 iex> ExBanking.Server.get_balance("John")
 
-iex> ExBanking.Registry.whereis_name({:init_user, "Oleg"}) |> Process.exit(:kill)
+iex> Process.whereis(:user_process_registry)
+
+iex> ExBanking.Registry.whereis_name({:user_process_registry, "Oleg"}) |> Process.exit(:kill)
+
 iex> ExBanking.Server.get_balance("Oleg")
 iex> ExBanking.Server.deposit("Oleg", "Aloha kakahiaka")
 iex> ExBanking.Server.get_balance("Oleg")
 
-iex> ExBanking.Registry.whereis_name({:init_user, "Josh"}) |> Process.exit(:kill)
+iex> ExBanking.Registry.whereis_name({:user_process_registry, "Josh"}) |> Process.exit(:kill)
+
 iex> ExBanking.Server.get_balance("Josh")
 iex> ExBanking.Server.deposit("Josh", "Aloha awakea")
 iex> ExBanking.Server.get_balance("Josh")
 
-iex> ExBanking.Registry.whereis_name({:init_user, "John"}) |> Process.exit(:kill)
+iex> ExBanking.Registry.whereis_name({:user_process_registry, "John"}) |> Process.exit(:kill)
+
 iex> ExBanking.Server.get_balance("John")
 iex> ExBanking.Server.deposit("John", "Aloha ‘auinalā")
 iex> ExBanking.Server.get_balance("John")
@@ -217,6 +222,17 @@ iex> Process.exit(pid3, :kill)
 iex> ExBanking.Server.get_balance("John")
 iex> ExBanking.Server.deposit("John", "Aloha ‘auinalā")
 iex> ExBanking.Server.get_balance("John")
+```
+
+## 
+
+```bash
+iex> ExBanking.Repo.create_user("Oleg")
+iex> ExBanking.Repo.find_or_create_user("Josh")
+iex> ExBanking.Repo.destroy_user("Josh")
+iex> ExBanking.Repo.user_exists?("Josh")
+iex> ExBanking.Repo.get_users
+iex> ExBanking.Repo.user_process_count
 ```
 
 ### 15 Jan 2019 by Oleg G.Kapranov

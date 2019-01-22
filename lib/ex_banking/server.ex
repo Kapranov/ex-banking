@@ -7,7 +7,7 @@ defmodule ExBanking.Server do
   @user_registry :user_process_registry
 
   def start_link(name) do
-    GenServer.start_link(@name, [], name: via_tuple(name))
+    GenServer.start_link(@name, [name], name: via_tuple(name))
   end
 
   def get_balance(user) do
@@ -30,7 +30,7 @@ defmodule ExBanking.Server do
   end
 
   # without custom ExBanking.Registry
-  # defp via_tuple(name), do: {:via, ExBanking.Registry, {:init_user, name}}
+  # defp via_tuple(name), do: {:via, ExBanking.Registry, {@user_registry, name}}
 
   # without extand package :gproc
   # defp via_tuple(name), do: {:via, :gproc, {:n, :l, {@user_registry, name}}}
