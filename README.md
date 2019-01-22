@@ -89,7 +89,7 @@ defmodule ExBanking.Server do
   # ...
 
   defp via_tuple(name) do
-    {:via, :gproc, {:n, :l, {:init_user, name}}}
+    {:via, :gproc, {:n, :l, {@user_registry, name}}}
   end
 
   # ...
