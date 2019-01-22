@@ -219,4 +219,4 @@ iex> ExBanking.Server.deposit("John", "Aloha ‘auinalā")
 iex> ExBanking.Server.get_balance("John")
 ```
 
-### 15 Jan 2019
+### 15 Jan 2019 by Oleg G.Kapranov
