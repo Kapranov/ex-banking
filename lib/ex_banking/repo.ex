@@ -39,6 +39,20 @@ defmodule ExBanking.Repo do
   end
 
   @doc """
+  Convert user process to atom by `ExBanking.Server`.
+
+  Return boolean `true` if successful.
+  If there is an issue, a `false` is returned.
+  """
+  @spec register_name(name :: String.t) :: :atom | false
+  def register_name(name) when is_bitstring(name) do
+    case Registry.lookup(@user_registry, name) do
+      [] -> false
+      [{pid, _}] -> convert(pid, name)
+    end
+  end
+
+  @doc """
   Determines if a `ExBanking.Server` process exists, based on the `name` provided.
 
   Returns a boolean.
@@ -109,5 +123,15 @@ defmodule ExBanking.Repo do
     ]
 
     supervise(children, strategy: :simple_one_for_one)
+  end
+
+  @doc false
+  defp convert(pid, name) do
+    state =
+      name
+      |> String.downcase
+      |> String.to_atom
+
+    Process.register(pid, state)
   end
 end

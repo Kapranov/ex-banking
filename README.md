@@ -224,15 +224,20 @@ iex> ExBanking.Server.deposit("John", "Aloha ‘auinalā")
 iex> ExBanking.Server.get_balance("John")
 ```
 
-## 
+## The functions in `ExBanking.Repo`
 
 ```bash
+iex> Supervisor.which_children(:user_process_registry)
+
 iex> ExBanking.Repo.create_user("Oleg")
 iex> ExBanking.Repo.find_or_create_user("Josh")
 iex> ExBanking.Repo.destroy_user("Josh")
 iex> ExBanking.Repo.user_exists?("Josh")
 iex> ExBanking.Repo.get_users
 iex> ExBanking.Repo.user_process_count
+
+iex> [{pid, _}] = Registry.lookup(:user_process_registry, "Oleg")
+iex> Process.register(pid, :oleg)
 ```
 
 ### 15 Jan 2019 by Oleg G.Kapranov
