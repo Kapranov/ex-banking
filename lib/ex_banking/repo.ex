@@ -24,7 +24,18 @@ defmodule ExBanking.Repo do
   If there is an issue, an `{:error, reason}` tuple is returned.
   """
   def create_user(name) when is_bitstring(name) do
-    Supervisor.start_child(@name_supervisor, [name])
+    case Supervisor.start_child(@name_supervisor, [name]) do
+      {:ok, _} -> :ok
+      {:error, {:already_started, _}} -> {:error, :user_already_exists}
+    end
+  end
+
+  def create_user(name)
+      when is_integer(name)
+      when is_float(name)
+      when is_binary(name)
+      when is_nil(name) do
+    {:error, :wrong_arguments}
   end
 
   @doc """
