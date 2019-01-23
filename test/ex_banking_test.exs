@@ -1,12 +1,15 @@
 defmodule ExBankingTest do
-  use ExUnit.Case
+  use ExUnit.Case, async: true
   doctest ExBanking
 
-  test "create user in ex_banking" do
-    user1 = "Oleg"
+  setup do
+    user = Faker.Name.first_name
+    %{user: user}
+  end
 
-    assert ExBanking.create_user(user1) == :ok
-    assert ExBanking.create_user(user1) == {:error, :user_already_exists}
+  test "create user by ExBanking", %{user: user} do
+    assert ExBanking.create_user(user) == :ok
+    assert ExBanking.create_user(user) == {:error, :user_already_exists}
     assert ExBanking.create_user(123) == {:error, :wrong_arguments}
     assert ExBanking.create_user(nil) == {:error, :wrong_arguments}
   end
