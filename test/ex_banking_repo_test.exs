@@ -1,74 +1,79 @@
 defmodule ExBankingRepoTest do
-  use ExUnit.Case, async: true
+  use ExUnit.Case, async: false
   doctest ExBanking.Repo
 
+  alias ExBanking.{Server, Repo}
+
   setup do
-    user = Faker.Name.first_name
-    %{user: user}
+    count = 1..9
+    names = for _ <- count, do: Faker.Name.first_name
+    users = for user <- names, do: Repo.create_user(user)
+    %{
+      user: users,
+      name: names,
+      count: count
+    }
   end
 
-  test "create user by ExBanking.Repo", %{user: user} do
-    assert ExBanking.Repo.create_user(user) == :ok
-    assert ExBanking.Repo.create_user(user) == {:error, :user_already_exists}
-    assert ExBanking.Repo.create_user(123) == {:error, :wrong_arguments}
-    assert ExBanking.Repo.create_user(nil) == {:error, :wrong_arguments}
+  test "create_user by ExBanking.Repo", %{user: _users, name: names, count: count} do
+    users = for user <- names, do: Repo.create_user(user)
+    exists = for _ <- count, do: {:error, :user_already_exists}
+
+    assert users == exists
+    assert Repo.create_user(123) == {:error, :wrong_arguments}
+    assert Repo.create_user(nil) == {:error, :wrong_arguments}
   end
 
-  test "show get_balance and deposit by ExBanking.Server", %{user: user} do
-    assert ExBanking.Repo.create_user(user) == :ok
-    assert ExBanking.Server.deposit(user, "Aloha") == :ok
-    assert ExBanking.Server.get_balance(user) == {:ok, ["Aloha"]}
+  test "get_balance show a balance of user by ExBanking.Server", %{user: _users, name: names, count: count} do
+    balances = for user <- names, do: Server.get_balance(user)
+    result = for _ <- count, do: {:ok, []}
+
+    assert result == balances
   end
 
-  test "find_or_create_user by ExBanking.Repo",  %{user: user} do
-    assert ExBanking.Repo.find_or_create_user(user) == :ok
-    assert ExBanking.Repo.create_user(user) == {:error, :user_already_exists}
+  test "deposit for user by ExBanking.Server", %{user: _users, name: names, count: count} do
+    foods = for _ <- 1..1, do: Faker.Food.dish
+    deposits = for user <- names, food <- foods, do: Server.deposit(user, food)
+    result = for _ <- count, do: :ok
+
+    assert deposits == result
   end
 
-  test "destroy_user by ExBanking.Repo", %{user: user} do
-    assert ExBanking.Repo.create_user(user) == :ok
-    assert ExBanking.Repo.create_user(user) == {:error, :user_already_exists}
-    assert ExBanking.Repo.destroy_user(user) == :ok
+  test "find_or_create_user by ExBanking.Repo" do
+    name = Faker.Name.first_name
+
+    assert Repo.find_or_create_user(name) == :ok
+    assert Repo.create_user(name) == {:error, :user_already_exists}
+    assert Repo.create_user(123) == {:error, :wrong_arguments}
+    assert Repo.create_user(nil) == {:error, :wrong_arguments}
   end
 
-  test "check user exist by ExBanking.Repo", %{user: user} do
-    assert ExBanking.Repo.create_user(user) == :ok
-    assert ExBanking.Repo.create_user(user) == {:error, :user_already_exists}
-    assert ExBanking.Repo.user_exists?(user)  == true
+  test "destroy_user by ExBanking.Repo" do
+    name = Faker.Name.first_name
+
+    assert Repo.create_user(name) == :ok
+    assert Repo.create_user(name) == {:error, :user_already_exists}
+    assert Repo.destroy_user(name) == :ok
   end
 
-  test "show all users by ExBanking.Repo" do
-    # assert  ExBanking.Repo.get_users == []
+  test "check user exist by ExBanking.Repo", %{user: _users, name: names, count: count} do
+    registred = for user <- names, do: Repo.user_exists?(user)
+    result = for _ <- count, do: true
+
+    assert registred == result
   end
 
-  test "show count all users have been registered" do
-    # assert ExBanking.Repo.get_count ==
+  test "count all users have been registered" do
+    %{active: nums, specs: _, supervisors: _, workers: _} = Supervisor.count_children(:user_supervisor)
+
+    assert Repo.get_count == nums
   end
 
-  test "check dead of process", %{user: user} do
-    assert ExBanking.Repo.create_user(user) == :ok
-    assert ExBanking.Server.get_balance(user) == {:ok, []}
-    assert ExBanking.Server.deposit(user, "Aloha kakahiaka") == :ok
-    assert ExBanking.Server.get_balance(user) == {:ok, ["Aloha kakahiaka"]}
+  test "register_name", %{user: _users, name: names, count: count} do
+    registred = for user <- names, do: Repo.register_name(user)
+    result = for _ <- count, do: true
 
-    [{pid1, _}] = Registry.lookup(:user_process_registry, user)
-
-    Process.exit(pid1, :kill)
-    ref = Process.monitor(pid1)
-
-    assert_receive {:DOWN, ^ref, _, _, _}
-  end
-
-  test "a new child process will restart as needed", %{user: user} do
-    [{_, pid, _, _}] = Supervisor.which_children(:user_process_registry)
-
-    assert ExBanking.Repo.create_user(user) === :ok
-    GenServer.stop(pid, :normal)
-
-    [{_, new_pid, _, _}] = Supervisor.which_children(:user_process_registry)
-    assert new_pid !== pid
-
-    assert ExBanking.Repo.create_user(user) === :ok
+    assert registred == result
   end
 
   test "Check an alive Register process by ExBanking.Server" do
@@ -77,10 +82,29 @@ defmodule ExBankingRepoTest do
     assert Process.alive?(registry) == true
   end
 
-  test "Registry new process by ExBanking.Server", %{user: user} do
-    assert ExBanking.Repo.create_user(user) == :ok
-    assert ExBanking.Repo.create_user(user) == {:error, :user_already_exists}
-    assert ExBanking.Repo.register_name(user) == true
+  test "a new child process will restart as needed" do
+    user = "Aloha"
+
+    [{_, pid, _, _}] = Supervisor.which_children(:user_process_registry)
+
+    assert Repo.create_user(user) === :ok
+
+    GenServer.stop(pid, :normal)
+
+    [{_, new_pid, _, _}] = Supervisor.which_children(:user_process_registry)
+
+    assert new_pid !== pid
+
+    assert Repo.create_user(user) === :ok
+  end
+
+  test "check dead of process", %{user: _users, name: names, count: _count} do
+    user = names |> List.first
+    [{pid1, _}] = Registry.lookup(:user_process_registry, user)
+
+    Process.exit(pid1, :kill)
+    ref = Process.monitor(pid1)
+
+    assert_receive {:DOWN, ^ref, _, _, _}
   end
 end
-
